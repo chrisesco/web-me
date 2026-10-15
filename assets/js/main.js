@@ -27,9 +27,9 @@ function renderBlog() {
   const base = grid.dataset.base || '';
 
   if (POSTS.length > 0) {
-    if (emptyNote) emptyNote.style.display = 'none';
     grid.innerHTML = POSTS.map(p => tarjetaPost(p, base)).join('');
   } else {
+    if (emptyNote) emptyNote.style.display = 'block';
     grid.innerHTML = DRAFT_IDEAS.map(d => `
       <div class="post-card">
         <span class="soon mono">Próximamente · ${d.tag}</span>

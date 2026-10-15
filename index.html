@@ -5,6 +5,40 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Datapsulas — SAP + Databricks + AI</title>
 <meta name="description" content="Datapsulas: cápsulas sobre SAP, Databricks e Inteligencia Artificial. Notas de lo que voy aprendiendo al unir esos tres mundos, escritas por Christian Escobar Florez.">
+<link rel="canonical" href="https://web-me-tan.vercel.app/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Datapsulas">
+<meta property="og:locale" content="es_ES">
+<meta property="og:url" content="https://web-me-tan.vercel.app/">
+<meta property="og:title" content="Datapsulas — SAP + Databricks + AI">
+<meta property="og:description" content="Cápsulas sobre SAP, Databricks e Inteligencia Artificial. Notas de lo que voy aprendiendo al unir esos tres mundos.">
+<meta property="og:image" content="https://web-me-tan.vercel.app/assets/img/datasphere-informix-conexion.png">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://web-me-tan.vercel.app/#website",
+      "url": "https://web-me-tan.vercel.app/",
+      "name": "Datapsulas",
+      "description": "Cápsulas sobre SAP, Databricks e Inteligencia Artificial.",
+      "inLanguage": "es",
+      "publisher": { "@id": "https://web-me-tan.vercel.app/#person" }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://web-me-tan.vercel.app/#person",
+      "name": "Christian Escobar Florez",
+      "url": "https://web-me-tan.vercel.app/",
+      "jobTitle": "Ingeniero de datos",
+      "knowsAbout": ["SAP Datasphere", "SAP HANA Cloud", "Databricks", "Ingeniería de datos", "Inteligencia Artificial"],
+      "sameAs": ["https://www.linkedin.com/in/chrisescobarflorezdata/"]
+    }
+  ]
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -134,7 +168,14 @@
       <p>Notas sobre el cruce entre SAP, Databricks y AI. Voy a publicar aquí lo que voy aprendiendo, con nombres reales de tablas y errores reales.</p>
     </div>
     <div class="blog-grid reveal" id="blog-grid" data-base="">
-      <!-- Los posts se generan desde el array POSTS en assets/js/posts.js -->
+      <!-- Los posts se generan desde el array POSTS en assets/js/posts.js.
+           El enlace de abajo es el respaldo rastreable por buscadores:
+           main.js lo reemplaza por la tarjeta equivalente al cargar. -->
+      <a href="blog/informix-sap-datasphere-generic-jdbc.html" class="post-card is-published">
+        <span class="soon mono">SAP · Oct 2026</span>
+        <h4>Cómo conectar Informix IBM a SAP Datasphere con una conexión Generic JDBC</h4>
+        <p>Informix no tiene conector nativo en Datasphere. La ruta real pasa por el DP Agent, el adaptador CamelJdbcAdapter y una dependencia que casi nadie menciona.</p>
+      </a>
     </div>
     <p id="blog-empty-note">Aún no hay publicaciones — la primera se agrega en <span class="mono">assets/js/posts.js</span>.</p>
   </section>
