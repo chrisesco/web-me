@@ -135,3 +135,39 @@ figcaption{
 @media (max-width:900px){ .related-grid{grid-template-columns:1fr;} }
 .related-empty{text-align:center; color:var(--ink-soft); font-size:15px;}
 .related-cta{text-align:center; margin-top:36px;}
+
+/* ---------- ME GUSTA ---------- */
+.post-like{
+  display:flex; flex-direction:column; align-items:center; gap:14px;
+  text-align:center; margin:8px 0 8px;
+}
+.post-like-ask{font-size:15px; color:var(--ink-soft); margin:0;}
+.like-btn{
+  display:inline-flex; align-items:center; gap:10px;
+  font-family:inherit; font-size:15px; font-weight:600; color:var(--ink);
+  background:var(--card); border:1px solid var(--line); border-radius:980px;
+  padding:11px 22px; cursor:pointer;
+  transition:transform .2s, box-shadow .2s, background .2s, border-color .2s, color .2s;
+}
+.like-btn:hover:not(:disabled){
+  transform:translateY(-1px); border-color:var(--sap); color:var(--sap);
+  box-shadow:0 8px 20px var(--shadow-soft);
+}
+.like-btn:active:not(:disabled){transform:translateY(0);}
+.like-btn svg{width:19px; height:19px; flex:0 0 auto;}
+/* Marcado: queda fijo, con el azul de la marca. No hay cursor de clic
+   porque el me gusta no se puede quitar. */
+.like-btn.is-liked{
+  color:var(--sap); border-color:var(--sap);
+  background:color-mix(in srgb, var(--sap) 10%, var(--card));
+  cursor:default; opacity:1;
+}
+.like-btn.is-liked svg{fill:currentColor; animation:like-pop .32s ease-out;}
+.like-count{
+  font-family:'JetBrains Mono', monospace; font-size:13px;
+  padding-left:10px; margin-left:2px; border-left:1px solid var(--line);
+}
+.like-done{font-size:13.5px; color:var(--ink-soft); margin:0;}
+@keyframes like-pop{
+  0%{transform:scale(1);} 45%{transform:scale(1.35);} 100%{transform:scale(1);}
+}

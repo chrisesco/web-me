@@ -15,6 +15,7 @@
 <meta property="og:description" content="Informix no tiene conector nativo en SAP Datasphere. Guía paso a paso de la ruta real: Generic JDBC sobre el CamelJdbcAdapter del Data Provisioning Agent, el driver, la dependencia bson y los errores típicos del framework.trc.">
 <meta property="og:image" content="https://datapsulas.vercel.app/assets/img/datasphere-informix-conexion.png">
 <meta property="article:published_time" content="2026-10-14">
+<meta property="article:modified_time" content="2026-10-15">
 <meta property="article:author" content="Christian Escobar Florez">
 <meta property="article:section" content="SAP">
 <meta name="twitter:card" content="summary_large_image">
@@ -26,7 +27,7 @@
   "description": "Informix no tiene conector nativo en SAP Datasphere. Guía paso a paso de la ruta real: Generic JDBC sobre el CamelJdbcAdapter del Data Provisioning Agent, el driver, la dependencia bson y los errores típicos del framework.trc.",
   "image": "https://datapsulas.vercel.app/assets/img/datasphere-informix-conexion.png",
   "datePublished": "2026-10-14",
-  "dateModified": "2026-10-14",
+  "dateModified": "2026-10-15",
   "inLanguage": "es",
   "proficiencyLevel": "Expert",
   "author": {
@@ -94,7 +95,7 @@
         <span class="chip">SAP</span>
         <span>Octubre 2026</span>
         <span>·</span>
-        <span>6 min de lectura</span>
+        <span>7 min de lectura</span>
       </div>
       <h1 class="post-title">Cómo conectar Informix IBM a SAP Datasphere con una conexión Generic JDBC</h1>
       <p class="post-lead">Informix no aparece en la lista de conectores de Datasphere, y eso hace pensar que no se puede. Sí se puede: la ruta pasa por una conexión Generic JDBC apoyada en el Data Provisioning Agent. Esta es la preparación completa, incluida la dependencia que no sale en ninguna guía oficial y que bota la conexión al primer intento.</p>
@@ -197,7 +198,7 @@
     <p>Cuatro reglas sobre esa URL que conviene tener presentes:</p>
     <ul>
       <li><code>INFORMIXSERVER</code> es obligatorio y es el <strong>nombre de la instancia</strong> (el de <code>sqlhosts</code>), no el hostname. Es la confusión más común.</li>
-      <li>Los parámetros opcionales van separados por <code>;</code> — por ejemplo <code>DB_LOCALE</code>, <code>CLIENT_LOCALE</code>, <code>DELIMIDENT=Y</code>.</li>
+      <li>Los parámetros opcionales van separados por <code>;</code> — por ejemplo <code>DB_LOCALE</code> y <code>CLIENT_LOCALE</code>. <code>DELIMIDENT=Y</code> conviene ponerlo siempre: sin él la tabla remota se crea pero no devuelve datos (<a href="#delimident">ver más abajo</a>).</li>
       <li><strong>No incluya la contraseña en la URL.</strong> Datasphere no la almacena cifrada.</li>
       <li>La clase del driver se puede confirmar abriendo el jar como <code>.zip</code> y mirando <code>META-INF/services/java.sql.Driver</code>.</li>
     </ul>
@@ -206,6 +207,20 @@
       <img src="../assets/img/datasphere-informix-conexion.png" alt="Pantalla Editar conexión de SAP Datasphere con el tipo JDBC genérico: clase de controlador com.informix.jdbc.IfxDriver, Tablas remotas en Habilitado y un agente de aprovisionamiento de datos seleccionado." width="1520" height="1157" loading="lazy">
       <figcaption>Conexión Generic JDBC configurada, con agente seleccionado y <strong>Tablas remotas</strong> habilitadas. Los datos de servidor, nombres y agente están difuminados.</figcaption>
     </figure>
+
+    <h2 id="delimident">La tabla remota se crea pero no muestra los datos</h2>
+    <p>Con la conexión ya validada y la tabla remota desplegada, la vista previa de los datos puede fallar con este mensaje:</p>
+<pre><code>Error interno: Falló la ejecución de DPAdapterResultSet::Fetch:Camel</code></pre>
+    <p>No es red ni permisos: la conexión ya sirvió para leer el catálogo y crear la tabla remota. Lo que falla es el <em>fetch</em> de las filas. Datasphere genera el SQL con los nombres de tabla y de columna entre comillas dobles, y el driver de Informix solo interpreta las comillas dobles como <strong>identificadores delimitados</strong> cuando la sesión abre con <code>DELIMIDENT=Y</code>. Por defecto el parámetro va en <code>N</code>, así que esas comillas se leen como literales de texto y la consulta se cae del lado de Informix.</p>
+    <p>La solución es agregar ese parámetro al final de la URL JDBC de la conexión:</p>
+<pre><code>jdbc:informix-sqli://&lt;host&gt;:&lt;puerto&gt;/&lt;base&gt;:INFORMIXSERVER=&lt;servidor&gt;;DELIMIDENT=Y</code></pre>
+    <p>Sobre el ejemplo anterior:</p>
+<pre><code>jdbc:informix-sqli://10.0.0.25:9088/mi_base:INFORMIXSERVER=ol_informix1;DELIMIDENT=Y</code></pre>
+
+    <div class="callout">
+      <span class="label">Tip</span>
+      <p>Conviene dejar <code>DELIMIDENT=Y</code> desde el primer momento, antes de crear tablas remotas: el error no aparece al validar la conexión ni al importar el catálogo, solo al leer los datos, y para entonces ya parece un problema de otra cosa. Después de editar la URL, guarde la conexión y vuelva a probar la vista previa; si la tabla remota sigue fallando, elimínela y vuelva a desplegarla.</p>
+    </div>
 
     <h2>Cuando falla: leer los logs del agente</h2>
     <p>Los logs del agente están en <code>&lt;DPAgent_root&gt;/log/</code> — sobre todo <code>framework.trc</code> y <code>framework_alert.trc</code>. Para más detalle, se sube el nivel de trazas a <code>ALL</code> (KBA 2496051).</p>
@@ -216,6 +231,10 @@
           <tr><th>Error en framework.trc</th><th>Causa probable / acción</th></tr>
         </thead>
         <tbody>
+          <tr>
+            <td><code>DPAdapterResultSet::Fetch:Camel</code><br>(al ver los datos de una tabla remota)</td>
+            <td>Falta <code>DELIMIDENT=Y</code> al final de la URL JDBC. Ver <a href="#delimident">La tabla remota se crea pero no muestra los datos</a>.</td>
+          </tr>
           <tr>
             <td><code>Cannot create JDBC driver of class '' for connect URL ''</code></td>
             <td>La clase y la URL llegan vacías al adaptador: la definición del <code>CamelJdbcAdapter</code> no coincide con la que espera Datasphere. Revisar <code>adapters.xml</code> (una sola entrada), reiniciar, reregistrar el adaptador y volver a crear la conexión. Verificar la versión mínima del DP Agent.</td>
@@ -258,6 +277,23 @@
     <hr>
     <p><a href="../assets/docs/Guia_Conexion_Datasphere_Informix_Publica.pdf" target="_blank" rel="noopener">Descargar esta guía en PDF</a> — misma información, en formato imprimible.</p>
 
+    <hr>
+
+    <!-- ME GUSTA — la logica esta en assets/js/like.js -->
+    <div class="post-like" data-post="informix-sap-datasphere-generic-jdbc" data-api="/api/like">
+      <p class="post-like-ask">¿Te sirvió este artículo?</p>
+      <button class="like-btn" type="button" aria-pressed="false" title="Marcar como me gusta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+          <path d="M7 11l4.2-8.1a1.6 1.6 0 0 1 3 .9l-.8 4.2h5.1a2.4 2.4 0 0 1 2.35 2.9l-1.5 7A2.4 2.4 0 0 1 17 22H7z"></path>
+        </svg>
+        <span>Me gusta</span>
+        <span class="like-count" hidden></span>
+      </button>
+      <p class="like-done" hidden>¡Gracias! Tu me gusta quedó registrado.</p>
+    </div>
+
+
   </div>
 </article>
 
@@ -283,6 +319,7 @@
 
 <script src="../assets/js/posts.js"></script>
 <script src="../assets/js/main.js"></script>
+<script src="../assets/js/like.js"></script>
 
 </body>
 </html>
