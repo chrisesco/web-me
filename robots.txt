@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://web-me-tan.vercel.app/sitemap.xml
+Sitemap: https://datapsulas.vercel.app/sitemap.xml
