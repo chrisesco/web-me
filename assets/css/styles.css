@@ -1,0 +1,302 @@
+/* ============================================================
+   Christian Escobar Florez — hoja de estilos principal
+   Orden: tokens · base · nav · hero · secciones · about ·
+          bridge · work · blog · contact · footer · animaciones
+   ============================================================ */
+
+/* ---------- TOKENS ---------- */
+/* Modo claro (por defecto). Todo color de la pagina sale de aqui:
+   para cambiar el tema no hay que tocar ninguna otra regla. */
+:root{
+  --bg:#fbfbfd;
+  --bg-alt:#f5f5f7;
+  --ink:#1d1d1f;
+  --ink-soft:#6e6e73;
+  --line:#d2d2d7;
+  --sap:#0057d9;
+  --dbx:#ff3621;
+  --card:#ffffff;
+  --header-bg:rgba(251,251,253,0.8);
+  --header-line:rgba(0,0,0,0.06);
+  --shadow-soft:rgba(0,0,0,0.08);
+  --shadow-strong:rgba(0,0,0,0.18);
+  --radius:18px;
+  --max:1120px;
+}
+
+/* Modo oscuro: azul y rojo mas luminosos para que contrasten sobre fondo
+   oscuro (los originales #0057d9 / #ff3621 quedan ilegibles ahi). */
+:root[data-theme="dark"]{
+  --bg:#0d0d11;
+  --bg-alt:#15151b;
+  --ink:#f5f5f7;
+  --ink-soft:#9b9ba1;
+  --line:#2b2b33;
+  --sap:#4d94ff;
+  --dbx:#ff6a52;
+  --card:#16161d;
+  --header-bg:rgba(13,13,17,0.8);
+  --header-line:rgba(255,255,255,0.08);
+  --shadow-soft:rgba(0,0,0,0.5);
+  --shadow-strong:rgba(0,0,0,0.6);
+}
+
+/* Sin JS o antes de que el visitante elija: se respeta el sistema operativo.
+   El :not([data-theme="light"]) deja que una eleccion manual gane. */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d0d11;
+    --bg-alt:#15151b;
+    --ink:#f5f5f7;
+    --ink-soft:#9b9ba1;
+    --line:#2b2b33;
+    --sap:#4d94ff;
+    --dbx:#ff6a52;
+    --card:#16161d;
+    --header-bg:rgba(13,13,17,0.8);
+    --header-line:rgba(255,255,255,0.08);
+    --shadow-soft:rgba(0,0,0,0.5);
+    --shadow-strong:rgba(0,0,0,0.6);
+  }
+}
+
+/* ---------- BASE ---------- */
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  line-height:1.5;
+  transition:background .3s ease, color .3s ease;
+}
+a{color:inherit; text-decoration:none;}
+.mono{font-family:'JetBrains Mono', monospace;}
+.wrap{max-width:var(--max); margin:0 auto; padding:0 24px;}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important;}
+}
+
+/* ---------- NAV ---------- */
+header{
+  position:sticky; top:0; z-index:50;
+  background:var(--header-bg);
+  backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--header-line);
+}
+nav{
+  display:flex; align-items:center; justify-content:space-between; gap:20px;
+  padding:16px 24px; max-width:var(--max); margin:0 auto;
+}
+.brand{font-weight:700; font-size:16px; letter-spacing:-0.01em; display:flex; align-items:center; gap:8px;}
+.brand-dot{width:8px; height:8px; border-radius:50%; background:linear-gradient(135deg, var(--sap), var(--dbx));}
+/* margin-left:auto mantiene los enlaces a la derecha, junto al boton de tema
+   (sin esto, el boton como tercer hijo del flex los dejaria centrados) */
+.nav-links{display:flex; gap:32px; font-size:14px; color:var(--ink-soft); margin-left:auto;}
+.nav-links a{transition:color .2s;}
+.nav-links a:hover{color:var(--ink);}
+.nav-links a:focus-visible, a:focus-visible, button:focus-visible{outline:2px solid var(--sap); outline-offset:3px; border-radius:4px;}
+@media (max-width:640px){ .nav-links{display:none;} }
+
+/* ---------- BOTON DE TEMA ---------- */
+/* Vive fuera de .nav-links a proposito: esos se ocultan en movil
+   y el cambio de tema debe seguir disponible en el celular. */
+.theme-toggle{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:38px; height:38px; flex:0 0 auto;
+  border:1px solid var(--line); border-radius:50%;
+  background:var(--card); color:var(--ink-soft);
+  cursor:pointer; transition:color .2s, border-color .2s, transform .2s;
+}
+.theme-toggle:hover{color:var(--ink); border-color:var(--ink-soft); transform:translateY(-1px);}
+.theme-toggle svg{width:17px; height:17px; display:block;}
+/* Se muestra el icono del tema al que se va a cambiar, no el actual */
+.theme-toggle .icon-sun{display:none;}
+:root[data-theme="dark"] .theme-toggle .icon-sun{display:block;}
+:root[data-theme="dark"] .theme-toggle .icon-moon{display:none;}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .theme-toggle .icon-sun{display:block;}
+  :root:not([data-theme="light"]) .theme-toggle .icon-moon{display:none;}
+}
+
+/* ---------- HERO ---------- */
+.hero{
+  padding:120px 24px 90px;
+  text-align:center;
+}
+.eyebrow{
+  display:inline-flex; align-items:center; gap:8px;
+  font-size:12px; letter-spacing:0.12em; text-transform:uppercase;
+  color:var(--ink-soft); margin-bottom:22px;
+}
+.eyebrow::before, .eyebrow::after{content:''; width:20px; height:1px; background:var(--line);}
+h1{
+  font-size:clamp(38px, 6.2vw, 76px);
+  font-weight:800;
+  letter-spacing:-0.03em;
+  line-height:1.04;
+  max-width:920px;
+  margin:0 auto 24px;
+}
+h1 .grad{
+  background:linear-gradient(100deg, var(--sap), var(--dbx));
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+/* Los "+" del titular: más livianos para que respiren entre las tres palabras */
+h1 .plus{font-weight:500; font-size:0.78em; vertical-align:0.06em;}
+.hero p.lead{
+  font-size:clamp(17px, 2vw, 21px);
+  color:var(--ink-soft);
+  max-width:600px;
+  margin:0 auto 40px;
+}
+.cta-row{display:flex; gap:14px; justify-content:center; flex-wrap:wrap;}
+.btn{
+  display:inline-block; padding:13px 26px; border-radius:980px;
+  font-size:15px; font-weight:600; transition:transform .2s, box-shadow .2s, background .2s;
+}
+.btn-primary{background:var(--ink); color:var(--bg);}
+.btn-primary:hover{transform:translateY(-1px); box-shadow:0 8px 20px var(--shadow-strong);}
+.btn-secondary{background:transparent; color:var(--ink); border:1px solid var(--line);}
+.btn-secondary:hover{background:var(--bg-alt);}
+
+/* ---------- SECCIONES (compartido) ---------- */
+section{padding:100px 24px;}
+.section-head{max-width:640px; margin:0 auto 56px; text-align:center;}
+.section-head h2{font-size:clamp(28px,4vw,42px); font-weight:800; letter-spacing:-0.02em; margin-bottom:14px;}
+.section-head p{color:var(--ink-soft); font-size:17px;}
+
+/* ---------- ABOUT ---------- */
+#about{background:var(--bg-alt);}
+.about-grid{
+  max-width:800px; margin:0 auto; text-align:center;
+}
+.about-grid p{font-size:19px; color:var(--ink); line-height:1.65; margin-bottom:28px;}
+.badges{display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:8px;}
+.badge{
+  font-family:'JetBrains Mono', monospace; font-size:12.5px;
+  padding:9px 16px; border-radius:980px; border:1px solid var(--line);
+  background:var(--card); color:var(--ink-soft);
+}
+
+/* ---------- BRIDGE / EXPERTISE ---------- */
+.bridge{
+  display:grid; grid-template-columns:1fr auto 1fr; gap:0; align-items:start;
+  max-width:900px; margin:0 auto;
+}
+.stack-col{padding:8px 20px;}
+.stack-col h3{
+  font-size:13px; letter-spacing:0.1em; text-transform:uppercase;
+  margin-bottom:20px; display:flex; align-items:center; gap:10px;
+}
+.stack-col.sap h3{color:var(--sap);}
+.stack-col.dbx h3{color:var(--dbx);}
+.stack-col ul{list-style:none;}
+.stack-col li{
+  font-size:15.5px; border-bottom:1px solid var(--line);
+  color:var(--ink);
+}
+/* Cada item enlaza a la plataforma oficial: toda la fila es clickeable */
+.stack-col li a{
+  display:block; padding:11px 0;
+  transition:color .2s;
+}
+.stack-col li a::after{
+  content:"\2197"; font-size:0.72em; margin-left:6px;
+  opacity:0; transition:opacity .2s;
+}
+.stack-col li a:hover::after, .stack-col li a:focus-visible::after{opacity:0.7;}
+.stack-col.sap li a:hover{color:var(--sap);}
+.stack-col.dbx li a:hover{color:var(--dbx);}
+.stack-col.dbx{text-align:right;}
+.bridge-line{
+  width:2px; background:linear-gradient(180deg, var(--sap), var(--dbx));
+  position:relative; margin-top:20px; min-height:100%;
+  overflow:visible;
+}
+.bridge-line::after{
+  content:''; position:absolute; left:50%; top:0;
+  width:8px; height:8px; margin-left:-4px; border-radius:50%;
+  background:var(--card); border:2px solid var(--sap);
+  box-shadow:0 0 0 4px var(--bg);
+  animation:travel 3.6s ease-in-out infinite;
+}
+@keyframes travel{
+  0%{top:0%; border-color:var(--sap);}
+  50%{top:96%; border-color:var(--dbx);}
+  100%{top:0%; border-color:var(--sap);}
+}
+@media (max-width:720px){
+  .bridge{grid-template-columns:1fr; gap:32px;}
+  .stack-col.dbx{text-align:left;}
+  .bridge-line{display:none;}
+}
+
+.now-card{
+  max-width:640px; margin:56px auto 0; padding:24px 28px;
+  border:1px solid var(--line); border-radius:var(--radius); background:var(--card);
+}
+.now-card .tag{
+  font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--dbx);
+  letter-spacing:0.08em; text-transform:uppercase; margin-bottom:10px; display:block;
+}
+.now-card p{font-size:15.5px; color:var(--ink-soft); line-height:1.6;}
+
+/* ---------- WORK ---------- */
+.cards{
+  display:grid; grid-template-columns:repeat(2, 1fr); gap:20px; max-width:var(--max); margin:0 auto;
+}
+@media (max-width:760px){ .cards{grid-template-columns:1fr;} }
+.card{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+  padding:32px; transition:transform .25s, box-shadow .25s;
+}
+.card:hover{transform:translateY(-3px); box-shadow:0 12px 30px var(--shadow-soft);}
+.card .num{font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--ink-soft); margin-bottom:14px; display:block;}
+.card h3{font-size:19px; font-weight:700; margin-bottom:10px; letter-spacing:-0.01em;}
+.card p{font-size:14.5px; color:var(--ink-soft); line-height:1.6;}
+
+/* ---------- BLOG ---------- */
+#blog{background:var(--bg-alt);}
+.blog-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:20px; max-width:var(--max); margin:0 auto;}
+@media (max-width:900px){ .blog-grid{grid-template-columns:1fr;} }
+.post-card{
+  background:var(--card); border:1px dashed var(--line); border-radius:var(--radius);
+  padding:26px; display:flex; flex-direction:column; gap:14px; min-height:180px;
+}
+/* Los posts publicados usan borde sólido; los borradores, punteado */
+.post-card.is-published{border-style:solid;}
+.post-card .soon{
+  align-self:flex-start; font-family:'JetBrains Mono', monospace; font-size:11px;
+  color:var(--ink-soft); border:1px solid var(--line); padding:4px 10px; border-radius:980px;
+}
+.post-card h4{font-size:16px; font-weight:600; letter-spacing:-0.01em;}
+.post-card p{font-size:13.5px; color:var(--ink-soft);}
+#blog-empty-note{
+  max-width:640px; margin:44px auto 0; text-align:center; font-size:14px; color:var(--ink-soft);
+}
+
+/* ---------- CONTACT ---------- */
+#contact{text-align:center;}
+#contact h2{font-size:clamp(28px,4vw,42px); font-weight:800; letter-spacing:-0.02em; margin-bottom:16px;}
+#contact p{color:var(--ink-soft); font-size:17px; margin-bottom:32px;}
+.contact-links{display:flex; gap:16px; justify-content:center; flex-wrap:wrap;}
+
+/* ---------- FOOTER ---------- */
+footer{
+  padding:36px 24px; border-top:1px solid var(--line);
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+  max-width:var(--max); margin:0 auto; font-size:13px; color:var(--ink-soft);
+}
+/* La firma del autor en el footer: enlace discreto, no un boton */
+footer a{border-bottom:1px solid var(--line); transition:color .2s, border-color .2s;}
+footer a:hover{color:var(--ink); border-bottom-color:var(--ink-soft);}
+
+/* ---------- ANIMACIONES ---------- */
+.reveal{opacity:0; transform:translateY(16px); transition:opacity .7s ease, transform .7s ease;}
+.reveal.in{opacity:1; transform:translateY(0);}

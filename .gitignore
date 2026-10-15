@@ -1,0 +1,13 @@
+# Sistema operativo / OneDrive
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
+~$*
+
+# Editores
+.vscode/
+.idea/
+
+# Vercel
+.vercel

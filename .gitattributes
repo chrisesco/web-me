@@ -1,0 +1,18 @@
+# Finales de linea normalizados a LF en el repositorio
+*.html  text eol=lf
+*.css   text eol=lf
+*.js    text eol=lf
+*.md    text eol=lf
+*.json  text eol=lf
+*.txt   text eol=lf
+
+# Binarios: git no debe tocarlos (convertir CRLF corrompe el PDF)
+*.pdf   binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.woff  binary
+*.woff2 binary

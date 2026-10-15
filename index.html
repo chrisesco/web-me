@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Datapsulas — SAP + Databricks + AI</title>
+<meta name="description" content="Datapsulas: cápsulas sobre SAP, Databricks e Inteligencia Artificial. Notas de lo que voy aprendiendo al unir esos tres mundos, escritas por Christian Escobar Florez.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="assets/css/styles.css">
+<!-- Sincrono y antes del <body>: evita el destello blanco al cargar en modo oscuro -->
+<script src="assets/js/theme.js"></script>
+</head>
+<body>
+
+<header>
+  <nav>
+    <a class="brand" href="index.html"><span class="brand-dot"></span> Datapsulas</a>
+    <div class="nav-links">
+      <a href="#about">Sobre mí</a>
+      <a href="#expertise">Experiencia</a>
+      <a href="#work">Enfoque</a>
+      <a href="#blog">Blog</a>
+      <a href="#contact">Contacto</a>
+    </div>
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Cambiar de tema">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4"></circle>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+      </svg>
+    </button>
+  </nav>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero">
+    <span class="eyebrow mono">Ingeniería de datos · SAP · AI</span>
+    <h1>Uniendo lo mejor de <span class="grad">SAP <span class="plus">+</span> Databricks <span class="plus">+</span> AI</span>.</h1>
+    <p class="lead">Datapsulas es donde escribo, en mis tiempos libres, sobre SAP, Databricks e Inteligencia Artificial — y sobre lo que aparece cuando se unen los tres. Cápsulas de lo que voy aprendiendo y resolviendo, por Christian Escobar Florez, Data AI Engineer.</p>
+    <div class="cta-row">
+      <a href="#work" class="btn btn-primary">Ver mi enfoque</a>
+      <a href="#blog" class="btn btn-secondary">Leer el blog</a>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="about-grid reveal">
+      <p>Trabajo en el cruce entre dos mundos que rara vez se hablan directamente: el SAP transaccional — Datasphere, HANA Cloud, BTP, Analytics Cloud, ABAP — y el ecosistema moderno de datos en Databricks. Ese cruce es exactamente donde más valor se pierde en las empresas, y donde más me gusta trabajar.</p>
+      <div class="badges">
+        <span class="badge">SAP Business Data Cloud</span>
+        <span class="badge">Databricks Fundamentals</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERTISE / BRIDGE -->
+  <section id="expertise">
+    <div class="section-head reveal">
+      <h2>Dos mundos, un mismo dato</h2>
+      <p>El mismo registro financiero pasa por ambos lados. Estas son las piezas que conecto.</p>
+    </div>
+    <div class="bridge reveal">
+      <div class="stack-col sap">
+        <h3>SAP</h3>
+        <ul>
+          <li><a href="https://www.sap.com/products/data-cloud/datasphere.html" target="_blank" rel="noopener">Datasphere</a></li>
+          <li><a href="https://www.sap.com/products/data-cloud/hana.html" target="_blank" rel="noopener">HANA Cloud</a></li>
+          <li><a href="https://www.sap.com/products/technology-platform.html" target="_blank" rel="noopener">BTP</a></li>
+          <li><a href="https://www.sap.com/products/data-cloud/cloud-analytics.html" target="_blank" rel="noopener">SAP Analytics Cloud</a></li>
+          <li><a href="https://help.sap.com/docs/abap-cloud/abap-data-models/abap-core-data-services-abap-cds" target="_blank" rel="noopener">ABAP CDS Views</a></li>
+          <li><a href="https://help.sap.com/docs/SAP_S4HANA_ON-PREMISE_UPA/e55549ee96814207af9232a7688dd64a/8b8e5695c4dc4749a706f9fa2f6bda92.html" target="_blank" rel="noopener">ACDOCA / Universal Journal</a></li>
+        </ul>
+      </div>
+      <div class="bridge-line"></div>
+      <div class="stack-col dbx">
+        <h3>Databricks</h3>
+        <ul>
+          <li><a href="https://www.databricks.com/product/unity-catalog" target="_blank" rel="noopener">Unity Catalog</a></li>
+          <li><a href="https://delta.io/" target="_blank" rel="noopener">Delta Lake</a></li>
+          <li><a href="https://www.databricks.com/glossary/medallion-architecture" target="_blank" rel="noopener">Arquitectura medallion</a></li>
+          <li><a href="https://www.databricks.com/product/ai-bi/genie" target="_blank" rel="noopener">Genie Agents</a></li>
+          <li><a href="https://docs.databricks.com/aws/en/ingestion/cloud-object-storage/auto-loader/" target="_blank" rel="noopener">Auto Loader</a></li>
+          <li><a href="https://mlflow.org/" target="_blank" rel="noopener">MLflow</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="now-card reveal">
+      <span class="tag">Ahora mismo</span>
+      <p>Construyendo agentes de inteligencia artificial sobre los modelos de datos de SAP, siguiendo las mejores prácticas de desarrollo y una arquitectura medallion (bronze → silver → gold).</p>
+    </div>
+  </section>
+
+  <!-- WORK / FOCUS AREAS -->
+  <section id="work">
+    <div class="section-head reveal">
+      <h2>Áreas de enfoque</h2>
+      <p>Lo que suelo resolver para empresas con operación compleja en SAP.</p>
+    </div>
+    <div class="cards">
+      <div class="card reveal">
+        <span class="num mono">01</span>
+        <h3>Modelado financiero en S/4HANA</h3>
+        <p>Vistas CDS sobre ACDOCA, cuentas por cobrar y pagar, y el Universal Journal como fuente única de verdad.</p>
+      </div>
+      <div class="card reveal">
+        <span class="num mono">02</span>
+        <h3>Dashboards ejecutivos en SAC</h3>
+        <p>Analytics Designer para cartera y antigüedad de saldos, pensados para que un gerente decida en segundos.</p>
+      </div>
+      <div class="card reveal">
+        <span class="num mono">03</span>
+        <h3>Migraciones BW → Datasphere</h3>
+        <p>Modelos de facturación multi-país, extractores y estrategias de delta que no rompen lo que ya funciona.</p>
+      </div>
+      <div class="card reveal">
+        <span class="num mono">04</span>
+        <h3>Arquitecturas en Databricks</h3>
+        <p>Medallion architecture, Unity Catalog y agentes Genie para que los equipos de negocio pregunten en lenguaje natural.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- BLOG -->
+  <section id="blog">
+    <div class="section-head reveal">
+      <h2>Blog</h2>
+      <p>Notas sobre el cruce entre SAP, Databricks y AI. Voy a publicar aquí lo que voy aprendiendo, con nombres reales de tablas y errores reales.</p>
+    </div>
+    <div class="blog-grid reveal" id="blog-grid" data-base="">
+      <!-- Los posts se generan desde el array POSTS en assets/js/posts.js -->
+    </div>
+    <p id="blog-empty-note">Aún no hay publicaciones — la primera se agrega en <span class="mono">assets/js/posts.js</span>.</p>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="reveal">
+      <h2>Hablemos</h2>
+      <p>¿Tiene datos que todavía no hablan? Escríbame y lo conversamos.</p>
+      <div class="contact-links">
+        <a href="mailto:tu-correo@ejemplo.com" class="btn btn-primary">Escribir un correo</a>
+        <a href="https://www.linkedin.com/in/chrisescobarflorezdata/" class="btn btn-secondary" target="_blank" rel="noopener">LinkedIn</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>© <span id="year"></span> Datapsulas · Escrito por <a href="https://www.linkedin.com/in/chrisescobarflorezdata/" target="_blank" rel="noopener">Christian Escobar Florez</a></span>
+  <span class="mono">SAP × Databricks × AI</span>
+</footer>
+
+<script src="assets/js/posts.js"></script>
+<script src="assets/js/main.js"></script>
+
+</body>
+</html>

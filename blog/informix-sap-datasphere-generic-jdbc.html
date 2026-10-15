@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cómo conectar Informix IBM a SAP Datasphere con una conexión Generic JDBC — Datapsulas</title>
+<meta name="description" content="Informix no tiene conector nativo en SAP Datasphere. Guía paso a paso de la ruta real: Generic JDBC sobre el CamelJdbcAdapter del Data Provisioning Agent, el driver, la dependencia bson y los errores típicos del framework.trc.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="../assets/css/styles.css">
+<link rel="stylesheet" href="../assets/css/post.css">
+<!-- Sincrono y antes del <body>: evita el destello blanco al cargar en modo oscuro -->
+<script src="../assets/js/theme.js"></script>
+</head>
+<body>
+
+<header>
+  <nav>
+    <a class="brand" href="../index.html"><span class="brand-dot"></span> Datapsulas</a>
+    <div class="nav-links">
+      <a href="../index.html#about">Sobre mí</a>
+      <a href="../index.html#expertise">Experiencia</a>
+      <a href="../index.html#work">Enfoque</a>
+      <a href="../index.html#blog">Blog</a>
+      <a href="../index.html#contact">Contacto</a>
+    </div>
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Cambiar de tema">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4"></circle>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+      </svg>
+    </button>
+  </nav>
+</header>
+
+<main>
+<article>
+
+  <!-- CABECERA -->
+  <div class="post-hero">
+    <div class="inner">
+      <a class="back-link" href="../index.html#blog">Volver al blog</a>
+      <div class="post-meta">
+        <span class="chip">SAP</span>
+        <span>Octubre 2026</span>
+        <span>·</span>
+        <span>6 min de lectura</span>
+      </div>
+      <h1 class="post-title">Cómo conectar Informix IBM a SAP Datasphere con una conexión Generic JDBC</h1>
+      <p class="post-lead">Informix no aparece en la lista de conectores de Datasphere, y eso hace pensar que no se puede. Sí se puede: la ruta pasa por una conexión Generic JDBC apoyada en el Data Provisioning Agent. Esta es la preparación completa, incluida la dependencia que no sale en ninguna guía oficial y que bota la conexión al primer intento.</p>
+    </div>
+  </div>
+
+  <!-- CUERPO -->
+  <div class="post-body">
+
+    <h2>Por qué no hay un conector de Informix</h2>
+    <p>Informix (IBM / HCL) no tiene un conector nativo en SAP Datasphere. La conexión se hace con el tipo <strong>Generic JDBC</strong>, que no corre en la nube: se ejecuta sobre el adaptador <code>CamelJdbcAdapter</code> del <strong>Data Provisioning Agent (DP Agent)</strong>, un componente que se instala on-premise, del lado de usted.</p>
+    <p>Eso cambia el orden de las cosas. Antes de tocar Datasphere hay que tener un servidor con el DP Agent instalado, con red hacia el servidor Informix y con el driver JDBC de Informix copiado a mano. Mientras no haya un agente seleccionado, la función <strong>Tablas remotas</strong> de la conexión aparece como <em>Deshabilitado</em> — y ese es el síntoma que hace creer que la conexión quedó mal, cuando en realidad falta el agente.</p>
+
+    <h2>Lo que hay que pedir antes de empezar</h2>
+    <p>Casi todo el tiempo perdido en este tipo de conexión es tiempo esperando un dato que nadie pidió a tiempo. Vale la pena pedir todo de una vez:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>A quién</th><th>Qué</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Admin de Informix</td>
+            <td>Host/IP y puerto del listener (<code>onsoctcp</code>); nombre de la base de datos; nombre de la instancia <code>INFORMIXSERVER</code> (archivo <code>sqlhosts</code>); usuario de lectura (<code>CONNECT</code> + <code>SELECT</code>); locale de la base (<code>DB_LOCALE</code>) si hay tildes o eñes; versión de Informix.</td>
+          </tr>
+          <tr>
+            <td>Infraestructura / redes</td>
+            <td>Que el servidor del DP Agent llegue al host y puerto de Informix, con el firewall abierto.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>La prueba de red se hace desde el servidor del agente, no desde su equipo:</p>
+<pre><code>Test-NetConnection -ComputerName &lt;IPInformixDatabase&gt; -Port &lt;PortDB&gt;</code></pre>
+    <p>Debe devolver <code>TcpTestSucceeded : True</code>. Si eso falla, no siga: todo lo demás va a fallar después y con mensajes mucho menos claros.</p>
+
+    <h2>El driver JDBC y la dependencia que nadie menciona</h2>
+    <p>SAP no entrega el driver. Hay que bajarlo de IBM/HCL o de Maven Central. Y aquí está el detalle que cuesta una tarde: los drivers <code>4.50.x</code> dependen de la librería <strong>bson</strong> (la de MongoDB), que tiene su propia numeración. No existe un "bson 4.50". La versión que declaran los drivers 4.50 es <strong>bson 3.8.0</strong>.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Archivo</th><th>Dónde descargarlo</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>jdbc-4.50.x.jar</code><br>(driver Informix)</td>
+            <td>Maven Central: <a href="https://mvnrepository.com/artifact/com.ibm.informix/jdbc" target="_blank" rel="noopener">com.ibm.informix:jdbc</a>.<br>Alternativas: <code>$INFORMIXDIR/jdbc/lib/ifxjdbc.jar</code> en el servidor Informix, o el portal de descargas de HCL.</td>
+          </tr>
+          <tr>
+            <td><code>bson-3.8.0.jar</code><br>(dependencia)</td>
+            <td>Maven Central: <a href="https://mvnrepository.com/artifact/org.mongodb/bson/3.8.0" target="_blank" rel="noopener">org.mongodb:bson:3.8.0</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <span class="label">Tip</span>
+      <p>En la página del driver en mvnrepository, la sección <strong>Compile Dependencies</strong> muestra la versión exacta de bson que pide esa versión del driver. Si falta el bson, el error típico es <code>ClassNotFoundException: org.bson.BSONObject</code>.</p>
+    </div>
+
+    <h2>Preparar el DP Agent</h2>
+    <ol>
+      <li>Instalar el DP Agent y registrarlo en Datasphere: <strong>Configuración del sistema → Integración de datos → Agentes on-premise</strong>.</li>
+      <li>En <code>&lt;DPAgent_root&gt;/camel/adapters.xml</code>, verificar la entrada <code>&lt;Adapter type="CamelJdbcAdapter" ...&gt;</code>. La documentación de SDI indica descomentarla; en versiones recientes del agente ya viene activa. Debe existir <strong>una sola entrada</strong>, sin bloques viejos ni duplicados.</li>
+      <li>Copiar <code>jdbc-4.50.x.jar</code> y <code>bson-3.8.0.jar</code> en <code>&lt;DPAgent_root&gt;/camel/lib/</code>. En Windows la raíz suele ser <code>C:\usr\sap\dataprovagent\</code>; en Linux, <code>/usr/sap/dataprovagent/</code>.</li>
+      <li>Reiniciar el DP Agent.</li>
+      <li>En Datasphere, sobre el agente, habilitar <code>CamelJdbcAdapter</code> y confirmar que el agente queda <strong>Conectado</strong>. Si se modificó <code>adapters.xml</code>, deshabilitar y volver a habilitar el adaptador para reregistrarlo.</li>
+    </ol>
+
+    <p>La carpeta debe quedar así:</p>
+<pre><code>camel/lib/
+  |-- jdbc-4.50.x.jar
+  `-- bson-3.8.0.jar</code></pre>
+
+    <h2>Crear la conexión en Datasphere</h2>
+    <p>En el espacio: <strong>Conexiones → Crear → Generic JDBC (JDBC genérico)</strong>.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Campo</th><th>Valor</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Clase de controlador JDBC</td><td><code>com.informix.jdbc.IfxDriver</code></td></tr>
+          <tr><td>URL JDBC</td><td><code>jdbc:informix-sqli://&lt;host&gt;:&lt;puerto&gt;/&lt;base_datos&gt;:INFORMIXSERVER=&lt;instancia&gt;</code></td></tr>
+          <tr><td>Nombre de usuario / Contraseña</td><td>Usuario de lectura entregado por el admin de Informix</td></tr>
+          <tr><td>Agente de aprovisionamiento de datos</td><td>El DP Agent donde se habilitó <code>CamelJdbcAdapter</code></td></tr>
+          <tr><td>Nombre de la empresa / técnico</td><td>Nombre libre que identifique la conexión</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Un ejemplo con valores ficticios:</p>
+<pre><code>jdbc:informix-sqli://10.0.0.25:9088/mi_base:INFORMIXSERVER=ol_informix1</code></pre>
+
+    <p>Cuatro reglas sobre esa URL que conviene tener presentes:</p>
+    <ul>
+      <li><code>INFORMIXSERVER</code> es obligatorio y es el <strong>nombre de la instancia</strong> (el de <code>sqlhosts</code>), no el hostname. Es la confusión más común.</li>
+      <li>Los parámetros opcionales van separados por <code>;</code> — por ejemplo <code>DB_LOCALE</code>, <code>CLIENT_LOCALE</code>, <code>DELIMIDENT=Y</code>.</li>
+      <li><strong>No incluya la contraseña en la URL.</strong> Datasphere no la almacena cifrada.</li>
+      <li>La clase del driver se puede confirmar abriendo el jar como <code>.zip</code> y mirando <code>META-INF/services/java.sql.Driver</code>.</li>
+    </ul>
+
+    <figure>
+      <img src="../assets/img/datasphere-informix-conexion.png" alt="Pantalla Editar conexión de SAP Datasphere con el tipo JDBC genérico: clase de controlador com.informix.jdbc.IfxDriver, Tablas remotas en Habilitado y un agente de aprovisionamiento de datos seleccionado." width="1520" height="1157" loading="lazy">
+      <figcaption>Conexión Generic JDBC configurada, con agente seleccionado y <strong>Tablas remotas</strong> habilitadas. Los datos de servidor, nombres y agente están difuminados.</figcaption>
+    </figure>
+
+    <h2>Cuando falla: leer los logs del agente</h2>
+    <p>Los logs del agente están en <code>&lt;DPAgent_root&gt;/log/</code> — sobre todo <code>framework.trc</code> y <code>framework_alert.trc</code>. Para más detalle, se sube el nivel de trazas a <code>ALL</code> (KBA 2496051).</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Error en framework.trc</th><th>Causa probable / acción</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>Cannot create JDBC driver of class '' for connect URL ''</code></td>
+            <td>La clase y la URL llegan vacías al adaptador: la definición del <code>CamelJdbcAdapter</code> no coincide con la que espera Datasphere. Revisar <code>adapters.xml</code> (una sola entrada), reiniciar, reregistrar el adaptador y volver a crear la conexión. Verificar la versión mínima del DP Agent.</td>
+          </tr>
+          <tr>
+            <td><code>Cannot load JDBC driver class 'com.informix.jdbc.IfxDriver'</code></td>
+            <td>El jar no está en <code>camel/lib</code>, o el agente no se reinició.</td>
+          </tr>
+          <tr>
+            <td><code>ClassNotFoundException: org.bson.BSONObject</code></td>
+            <td>Falta <code>bson-3.8.0.jar</code> en <code>camel/lib</code>.</td>
+          </tr>
+          <tr>
+            <td><code>Connection refused</code> / timeout, o error de <code>INFORMIXSERVER</code></td>
+            <td>Red o firewall, puerto equivocado, o nombre de instancia incorrecto en la URL.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Hasta dónde llega esta conexión</h2>
+    <div class="callout warn">
+      <span class="label">Limitaciones</span>
+      <p>Generic JDBC soporta <strong>tablas remotas</strong>: federación y snapshot o replicación programada desde la tabla remota. <strong>No soporta</strong> replicación en tiempo real, flujos de datos ni flujos de replicación.</p>
+      <p>Para volúmenes grandes conviene preferir snapshots programados en lugar de consultas federadas.</p>
+    </div>
+    <p>Dicho de otro modo: sirve muy bien para traer maestros y tablas transaccionales a un ritmo definido, y no sirve para un caso que exija latencia de segundos. Vale la pena dejarlo claro con el negocio antes de montar la conexión, no después.</p>
+
+    <h2>Fuentes</h2>
+    <ul class="sources">
+      <li>SAP Help — <a href="https://help.sap.com/docs/HANA_SMART_DATA_INTEGRATION/7952ef28a6914997abc01745fef1b607/1247c9518f8d4b5b93fa2ad54cb2dcf6.html?locale=en-US" target="_blank" rel="noopener">SAP HANA Smart Data Integration</a>: configuración del Camel JDBC Adapter en el DP Agent.</li>
+      <li>SAP Blog — <a href="https://blogs.sap.com/2020/09/22/data-provisioning-using-oraclelogreaderadapter-and-cameljdbcadapter/" target="_blank" rel="noopener">Data Provisioning using OracleLogReaderAdapter and CamelJDBCAdapter</a>: descomentar <code>CamelJdbcAdapter</code> en <code>adapters.xml</code> y copiar el jar a <code>camel/lib</code>.</li>
+      <li>Driver Informix JDBC en <a href="https://mvnrepository.com/artifact/com.ibm.informix/jdbc" target="_blank" rel="noopener">Maven Central</a>.</li>
+      <li><a href="https://mvnrepository.com/artifact/org.mongodb/bson/3.8.0" target="_blank" rel="noopener">BSON 3.8.0</a> en Maven Central.</li>
+      <li><a href="https://repository.jboss.org/nexus/repository/developer/com/ibm/informix/jdbc/4.50.10/jdbc-4.50.10.pom" target="_blank" rel="noopener">POM del driver 4.50.10</a>, donde se ve declarada la dependencia bson 3.8.0.</li>
+      <li>IBM — <a href="https://www.ibm.com/docs/SSGU8G_14.1.0/com.ibm.jdbc.doc/ids_jdbc_008.htm" target="_blank" rel="noopener">What's new in Informix JDBC Driver 4.50</a>.</li>
+      <li>DbVisualizer — <a href="https://support.dbvis.com/support/solutions/articles/1000283140" target="_blank" rel="noopener">ClassNotFoundException org.bson.BSONObject</a>.</li>
+    </ul>
+
+    <hr>
+    <p><a href="../assets/docs/Guia_Conexion_Datasphere_Informix_Publica.pdf" target="_blank" rel="noopener">Descargar esta guía en PDF</a> — misma información, en formato imprimible.</p>
+
+  </div>
+</article>
+
+<!-- OTROS ARTICULOS -->
+<section class="related">
+  <div class="section-head reveal">
+    <h2>Otros artículos</h2>
+    <p>Más notas sobre el cruce entre SAP, Databricks y AI.</p>
+  </div>
+  <div class="related-grid reveal" id="related-grid" data-base="../" data-current="blog/informix-sap-datasphere-generic-jdbc.html">
+    <!-- Se genera desde POSTS en assets/js/posts.js -->
+  </div>
+  <div class="related-cta">
+    <a href="../index.html#blog" class="btn btn-secondary">Ver todo el blog</a>
+  </div>
+</section>
+</main>
+
+<footer>
+  <span>© <span id="year"></span> Datapsulas · Escrito por <a href="https://www.linkedin.com/in/chrisescobarflorezdata/" target="_blank" rel="noopener">Christian Escobar Florez</a></span>
+  <span class="mono">SAP × Databricks × AI</span>
+</footer>
+
+<script src="../assets/js/posts.js"></script>
+<script src="../assets/js/main.js"></script>
+
+</body>
+</html>
